@@ -10,8 +10,8 @@
 
 ### Contributions to the Report
 
-- **Report Software Design:** Wrote **Section 1.1 (Methodology and Tools)** to explain how we analyzed the dependencies[cite: 5].
-- **Report Software Design:** Created and filled the data table in **Section 1.2 (Code Dependency Results)** with the Fan-in/Fan-out metrics[cite: 5].
+- **Report Software Design:** Wrote **Section 1.1 (Methodology and Tools)** to explain how we analyzed the dependencies.
+- **Report Software Design:** Created and filled the data table in **Section 1.2 (Code Dependency Results)** with the Fan-in/Fan-out metrics.
 
 ---
 
@@ -19,11 +19,11 @@
 
 ### Activities & Effort
 
-- Collaborated with my teammate to compare my code dependency graph with their Git co-change history[cite: 5]
-- Started working on the second delivery (*Report Software Architecture*), focusing on the architectural characteristics[cite: 5].
+- Collaborated with my teammate to compare my code dependency graph with their Git co-change history
+- Started working on the second delivery (*Report Software Architecture*), focusing on the architectural characteristics.
 - Analyzed how Express.js achieves high maintainability and extensibility by keeping its core small and delegating heavy tasks to external packages.
 
 ### Contributions to the Report
 
-- **Report Software Design:** Finalized **Section 1.3 (Findings)** and **Section 1.4 (Knowledge Dependencies)**, fixing inconsistencies between our graphs[cite: 5].
-- **Report Software Architecture:** Wrote **Section 4 (Architectural Characteristics)**, using our coupling metrics to support the quality attributes analysis[cite: 5].
+- **Report Software Design:** Finalized **Section 1.3 (Findings)** and **Section 1.4 (Knowledge Dependencies)**, fixing inconsistencies between our graphs.
+- **Report Software Architecture:** Wrote **Section 4 (Architectural Characteristics)**, using our coupling metrics to support the quality attributes analysis.

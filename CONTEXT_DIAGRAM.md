@@ -1,4 +1,4 @@
-## 4. Context diagram (draft)
+## 1. Context diagram (draft)
 
 This diagram follows the **C4 Model Level 1 (System Context)** approach. It shows the Express.js application as a single black box and maps out *who* talks to it, *what* it does, and *what* it depends on without exposing any internal implementation details.
 

@@ -2,7 +2,7 @@
 
 ## Diagram
 
-This diagram follows the **C4 Model Level 1 (System Context)** approach. It shows the Express.js application as a single black box and maps out *who* talks to it, *what* it does, and *what* it depends on without exposing any internal implementation details.
+The diagram follows the **C4 Model Level 1 (System Context)** approach. It shows the Express.js application as a single black box and maps out *who* talks to it, *what* it does, and *what* it depends on without exposing any internal implementation details.
 
 ![Express.js System Context Diagram](./img/context-diagram.png)
 

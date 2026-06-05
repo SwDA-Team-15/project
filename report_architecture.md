@@ -66,7 +66,7 @@ The component diagram was created using PlantUML with the C4-PlantUML library. T
 
 The following diagram zooms into the Express Core container, mainly represented by the `lib/` directory. It shows the main internal components of Express.js and their relationships with Node.js APIs, the external router package, middleware packages, and template engines.
 
-![Express.js Component Diagram](img/component-diagram.puml)
+![Express.js Component Diagram](img/component-diagram.png)
 
 ### Component explanation
 

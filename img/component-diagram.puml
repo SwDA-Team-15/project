@@ -1,0 +1,55 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Express.js - Component Diagram / C4 Level 3
+
+Person(dev, "Application Developer", "Uses the Express public API to create apps, register middleware, routes, and view engines.")
+
+System_Ext(node, "Node.js Built-in APIs", "HTTP, Events, File System, Path")
+System_Ext(routerPkg, "router package", "External routing/middleware stack used by Express 5")
+System_Ext(bodyParser, "body-parser", "JSON, raw, text, and urlencoded middleware")
+System_Ext(staticPkg, "serve-static", "Static file middleware")
+System_Ext(templateEngine, "Template Engines", "EJS, Pug, Handlebars, etc.")
+
+Container_Boundary(expressCore, "Express Core - lib/") {
+
+  Component(expressEntry, "express.js / createApplication()", "Factory / Public API",
+  "Creates Express application instances and exposes app, request, response, Router, and built-in middleware shortcuts.")
+
+  Component(appProto, "application.js", "Application Orchestrator",
+  "Manages settings, middleware registration, routing delegation, app mounting, listen(), and view rendering.")
+
+  Component(reqProto, "request.js", "Request Adapter",
+  "Extends Node.js IncomingMessage with Express request helpers such as req.get(), req.accepts(), req.ip, req.query.")
+
+  Component(resProto, "response.js", "Response Adapter",
+  "Extends Node.js ServerResponse with helpers such as res.send(), res.json(), res.redirect(), res.sendFile(), res.render(), and cookies.")
+
+  Component(viewComp, "view.js", "View Resolver / Renderer Adapter",
+  "Resolves template file paths, loads template engines lazily, and invokes the selected engine.")
+
+  Component(utilsComp, "utils.js", "Shared Utilities / Strategy Selectors",
+  "Provides shared helpers such as ETag compilation, query parser compilation, charset handling, and content utilities.")
+}
+
+Rel(dev, expressEntry, "calls require('express')() and uses exported API")
+Rel(expressEntry, appProto, "mixes application prototype into app")
+Rel(expressEntry, reqProto, "creates per-app request prototype")
+Rel(expressEntry, resProto, "creates per-app response prototype")
+Rel(expressEntry, routerPkg, "exposes Router and Route")
+Rel(expressEntry, bodyParser, "exports middleware helpers")
+Rel(expressEntry, staticPkg, "exports static middleware")
+
+Rel(appProto, routerPkg, "delegates app.use(), app.route(), HTTP methods, and request handling")
+Rel(appProto, viewComp, "creates View during app.render()")
+Rel(appProto, utilsComp, "uses compileETag(), compileQueryParser(), compileTrust(), methods")
+Rel(appProto, node, "uses http.createServer() in app.listen()")
+
+Rel(reqProto, node, "adapts IncomingMessage")
+Rel(resProto, node, "adapts ServerResponse")
+Rel(resProto, utilsComp, "uses content-type, charset, ETag, and response helpers")
+Rel(resProto, appProto, "delegates res.render() to app.render()")
+Rel(viewComp, templateEngine, "loads and invokes render function")
+Rel(viewComp, node, "uses fs and path for view lookup")
+
+@enduml

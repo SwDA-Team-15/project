@@ -94,7 +94,7 @@ When inspecting the core Express.js implementation in the `lib/` directory, seve
 
 The creation of an Express application instance follows the Factory pattern.
 
-- **Location:** [`lib/express.js`](https://github.com/expressjs/express/blob/master/lib/express.js) – function `createApplication()`.
+- **Location:** [`lib/express.js` – `createApplication()`](https://github.com/expressjs/express/blob/master/lib/express.js)
 - **Roles:** `createApplication()` plays the role of the factory; the returned `app` object is the product; user code calling `const app = express()` is the client.
 - **Problem solved:** Node’s HTTP server expects a function handler, while the Express app also needs many methods (`use`, `get`, `listen`, etc.). The factory encapsulates the logic of building a callable function and then mixing in all the necessary behaviours before returning it.
 - **Why this pattern makes sense:** Centralising app construction keeps the public API simple and hides internal wiring (prototype setup, initialisation). It also isolates changes in the app’s internal structure from application developers.
@@ -104,7 +104,27 @@ The creation of an Express application instance follows the Factory pattern.
 
 The request-processing pipeline in Express is a textbook Chain of Responsibility.
 
-- **Location:** [`lib/router/index.js`](https://github.com/expressjs/express/blob/master/lib/router/index.js) and the public API `app.use()` / HTTP verb methods.
+> Router-level chain (simplified):
+
+```js
+// app.js (user side)
+app.use(loggerMiddleware);
+app.use(authMiddleware);
+app.get('/home', homeHandler);
+
+// router internals: walk the stack
+function handle(req, res, out) {
+  var idx = 0;
+  function next(err) {
+    var layer = stack[idx++];
+    if (!layer) return out(err);
+    layer.handle_request(req, res, next);
+  }
+  next();
+}
+```
+
+- **Location:** Historically implemented in `lib/router/index.js` (for the router and its `stack`), together with the public API `app.use()` and HTTP verb methods.
 - **Roles:** Each middleware or route handler `(req, res, next)` is a handler; the Router’s internal `stack` is the chain; the `router.handle()` function is the chain manager that walks the stack.
 - **Problem solved:** Many cross-cutting concerns (logging, authentication, parsing, error handling) need to run for each request, but not every route requires the same combination. The chain allows handlers to decide whether to handle a request or pass it along via `next()`.
 - **Why this pattern makes sense:** It keeps the core routing logic simple and lets applications compose behaviour incrementally by stacking middleware. New concerns can be inserted without changing existing handlers, which fits the extensibility goals seen in the architecture report.
@@ -114,7 +134,22 @@ The request-processing pipeline in Express is a textbook Chain of Responsibility
 
 Express uses a Decorator-like approach to extend Node’s HTTP primitives with higher-level helpers.
 
-- **Location:** [`lib/middleware/init.js`](https://github.com/expressjs/express/blob/master/lib/middleware/init.js), [`lib/request.js`](https://github.com/expressjs/express/blob/master/lib/request.js), [`lib/response.js`](https://github.com/expressjs/express/blob/master/lib/response.js).
+> Enrichment step (simplified from the old `lib/middleware/init.js`):
+
+```js
+module.exports = function init(app) {
+  return function expressInit(req, res, next) {
+    req.res = res;
+    res.req = req;
+    req.app = app;
+    Object.setPrototypeOf(req, app.request);
+    Object.setPrototypeOf(res, app.response);
+    next();
+  };
+};
+```
+
+- **Location:** Historically done in `lib/middleware/init.js` using the prototypes defined in [`lib/request.js`](https://github.com/expressjs/express/blob/master/lib/request.js) and [`lib/response.js`](https://github.com/expressjs/express/blob/master/lib/response.js).
 - **Roles:** The original `http.IncomingMessage` and `http.ServerResponse` act as components; the Express-specific `req` and `res` behaviours are decorators layered on top via prototype reassignment.
 - **Problem solved:** The raw Node objects are intentionally low-level. Applications need convenient helpers such as `req.params`, `req.accepts()`, `res.json()`, and `res.redirect()`, but it must still be possible to treat them as normal Node request/response objects.
 - **Why this pattern makes sense:** Decorating the existing objects preserves compatibility with the Node API (important for middleware reuse) while adding framework-specific features. It also keeps the wrapper thin, which matches the low‑overhead goal discussed in the Architectural Characteristics.
@@ -125,12 +160,23 @@ Express uses a Decorator-like approach to extend Node’s HTTP primitives with h
 Express relies on Strategy in multiple places where behaviour must be configurable.
 
 - **Template engines**
-  - **Location:** [`lib/view.js`](https://github.com/expressjs/express/blob/master/lib/view.js) and the `app.engine()` registration API.
+
+  > View lookup and engine resolution (simplified from [`lib/view.js`](https://github.com/expressjs/express/blob/master/lib/view.js)):
+
+  ```js
+  View.prototype.render = function render(options, callback) {
+    var engine = this.engine;           // chosen strategy
+    engine(this.path, options, callback);
+  };
+  ```
+
+  - **Location:** `lib/view.js` and the `app.engine()` registration API.
   - **Roles:** `view.js` acts as the context that needs to render templates; each registered engine (for example Pug, EJS, Handlebars) is a concrete strategy; the engine function signature defines the strategy interface.
   - **Problem solved:** Different applications want different template engines, but Express should not depend on any specific one. Strategy lets `view.js` call whichever engine is configured for a given file extension.
   - **Alternative:** Hard-coding a single built-in engine into the core would simplify the implementation but remove one of Express’s key strengths: freedom of choice for the view layer.
 
 - **Configuration policies in `utils.js`**
+
   - **Location:** [`lib/utils.js`](https://github.com/expressjs/express/blob/master/lib/utils.js) for ETag functions, query parsers, and trust-proxy logic.
   - **Roles:** The core expects a function with a given signature (for example, an ETag generator or query parser); each concrete implementation is a strategy.
   - **Problem solved:** Different deployments may require different ETag policies, query parsing behaviour, or proxy trust rules. Strategies allow these policies to be plugged in via configuration without changing core code.
@@ -140,6 +186,6 @@ Express relies on Strategy in multiple places where behaviour must be configurab
 
 Overall, the patterns observed in Express.js are consistent with the quantitative dependency analysis:
 
-- The **Factory** and **Decorator** patterns help keep the observable API simple while hiding the complexity of constructing and enriching the app, request, and response objects.
-- The **Chain of Responsibility** pattern explains why the Router and middleware stack have high fan-out: they deliberately centralise control flow through a configurable chain.
-- The **Strategy** pattern for template engines and configuration policies aligns with the high external fan-out seen in `response.js` and `utils.js`: many behaviours are delegated to pluggable, single-purpose modules rather than being hard-coded in the core.
+- The Factory and Decorator patterns help keep the observable API simple while hiding the complexity of constructing and enriching the app, request, and response objects.
+- The Chain of Responsibility pattern explains why the Router and middleware stack have high fan-out: they deliberately centralise control flow through a configurable chain.
+- The Strategy pattern for template engines and configuration policies aligns with the high external fan-out seen in `response.js` and `utils.js`: many behaviours are delegated to pluggable, single-purpose modules rather than being hard-coded in the core.

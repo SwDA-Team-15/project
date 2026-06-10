@@ -9,12 +9,8 @@
 - Looked into how the different modules connect to each other, which helped me later when writing the summary.
 - **Report Software Design:** Wrote the Summary section, where I pulled together the main takeaways from our dependency analysis and explained what the report covers and why.
 
-### Contributions to the Report
-
-- **Report Software Design:** Wrote **Section 1.1 (Methodology and Tools)** to explain how we analyzed the dependencies.
-- **Report Software Design:** Created and filled the data table in **Section 1.2 (Code Dependency Results)** with the Fan-in/Fan-out metrics.
-
 ---
+
 ## Week 3 
 
 ### Tasks & Progress

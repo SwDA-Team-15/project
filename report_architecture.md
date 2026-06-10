@@ -92,30 +92,27 @@ The npm package that the Body Parser Middleware container wraps. It handles the 
 
 ### Tool used
 
-The component diagram was created using PlantUML with the C4-PlantUML library. This tool was selected because it supports the C4 model notation and allows diagrams to be stored as text-based files inside the project repository.
+The component diagram was created with **PlantUML** and the **C4-PlantUML** library.
 
 ### Component Diagram
 
-The following diagram zooms into the Express Core container, mainly represented by the `lib/` directory. It shows the main internal components of Express.js and their relationships with Node.js APIs, the external router package, middleware packages, and template engines.
+This diagram zooms into the **Express Core** container defined in the previous C4 Level 2 diagram. The focus is on the internal responsibilities mainly implemented in `lib/express.js` and `lib/application.js`, while the other Level 2 containers are shown as external collaborators.
 
 ![Express.js Component Diagram](img/component-diagram.png)
 
 ### Component explanation
 
-The component diagram focuses on the Express Core container of Express.js. The selected boundary is the `lib/` directory because it contains the main runtime implementation of the framework. External packages and Node.js built-in modules are shown as external dependencies and are not decomposed further.
+The **Express Core Container** is decomposed into components that represent its main runtime responsibilities.
 
-The main entry point is `express.js`, which creates an Express application instance through `createApplication()`. This component exposes the public API used by application developers and connects the application object with the request and response prototypes.
+The **Public API Facade** exposes the developer-facing API, including `express()`, `Router`, `Route`, and middleware helper functions. The **Application Factory** creates the callable `app` object through `createApplication()`, attaches prototypes, and initializes the application instance.
 
-The `application.js` component acts as the central application orchestrator. It manages application settings, middleware registration, routing delegation, mounted applications, server startup through `listen()`, and view rendering through `render()`.
+The **Settings & Engine Registry** stores application configuration through methods such as `app.set()`, `app.get()`, and `app.engine()`. The **Middleware & Route Registration API** handles `app.use()`, `app.route()`, and HTTP verb methods, then delegates registered handlers to the Router & Middleware Engine.
 
-The `request.js` component adapts Node.js `IncomingMessage` by adding Express-specific helper methods and properties. These include methods and properties for headers, content negotiation, protocol information, IP resolution, and query handling.
+The **Request Lifecycle Coordinator** represents `app.handle()`. It receives requests from the Node.js runtime, prepares enriched request/response objects, and delegates execution to the middleware stack. The **Rendering Coordinator** represents `app.render()`, reading view settings and delegating rendering to the View Engine.
 
-The `response.js` component adapts Node.js `ServerResponse` by adding high-level response helpers such as sending text or JSON responses, redirects, files, cookies, and rendered views.
+The **HTTP Server Bootstrapper** represents `app.listen()`, which uses `http.createServer()` to bind the Express application to the Node.js HTTP runtime. Finally, the **Middleware Export Adapter** exposes shortcuts such as `express.json()`, `express.urlencoded()`, and `express.static()`, while delegating the actual work to Body Parser and Static File Middleware.
 
-The `view.js` component is responsible for resolving template files and invoking the selected template engine. It separates template lookup and rendering from the main application object.
-
-The `utils.js` component provides shared helper functions used by other components, especially `application.js` and `response.js`. These utilities include ETag configuration, query parser configuration, trust proxy configuration, charset handling, and content-related helper functions.
-
+This decomposition keeps the Level 3 diagram consistent with the Container Level view: Router, Request/Response Enrichment, View Engine, Static File Middleware, and Body Parser Middleware remain outside Express Core and interact with it as collaborating containers.
 ### SOLID Principles Analysis
 
 The table below summarises how the main core modules in `lib/` relate to the SOLID principles at component level.

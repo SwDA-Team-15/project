@@ -126,7 +126,7 @@ The table below summarises how the main core modules in `lib/` relate to the SOL
 | **Interface Segregation (ISP)** | Mixed outcome | • From the application side, each middleware only uses a small set of methods on `req`, `res` and the app. <br>• Internally, `application.js`, `request.js` and especially `response.js` expose wide APIs that cover many different concerns; there are no smaller, dedicated interfaces for configuration, routing or response types. |
 | **Dependency Inversion (DIP)** | Applied at public boundaries, limited inside HTTP layer | • Middleware and strategies: Express depends on simple function contracts (`(req, res, next)`, ETag functions, query parsers, trust‑proxy functions), which users can provide without changing the framework. <br>• Template engines: `view.js` calls engines via a generic render function and does not depend on a specific library. <br>• Inside `request.js` and `response.js`, the code imports concrete packages like `send`, `cookie`, `accepts` and `type-is` directly. |
 
-## 4. Architectural Characteristics (draft)
+## 4. Architectural Characteristics
 
 To evaluate the overall quality of the Express.js architecture, we analyze its primary architectural characteristics (Quality Attributes) and demonstrate how they are structurally supported by the framework's design. To ground this analysis in objective software engineering principles, we support our reasoning using software metrics, specifically **Component Coupling** (inter-component dependencies) and **Cohesion** (intra-component single-purpose focus).
 
@@ -142,20 +142,20 @@ Extensibility is the defining architectural characteristic of Express.js, allowi
 Express.js prioritizes a lightweight core footprint by shifting computational complexity to the outer edges of its ecosystem.
 
 - **Supporting Architecture:** Instead of building a monolithic web framework, the architecture heavily relies on delegating atomic responsibilities to specialized, standalone external npm packages (for example, `parseurl`, `send`, `accepts`).
-- **Metrics-Based Evidence:** This strategy introduces an interesting architectural trade-off visible in the coupling metrics. Modules like `lib/response.js` present a very high external Fan-out (16), connecting to a wide array of single-purpose external utilities. While high coupling is traditionally a risk factor, here it signifies a deliberate design decision: Express delegates specialized protocol specifications (like mime-types, cookie signing, or content disposition) to the open-source community, keeping the core codebase highly cohesive and focused purely on routing and delegation HTTP contracts.
+- **Metrics-Based Evidence:** This strategy introduces an interesting architectural trade-off visible in the coupling metrics. Modules like `lib/response.js` present a very high external Fan-out (16), connecting to a wide array of single-purpose external utilities. While this concentration of external dependencies causes a technical violation of the Single Responsibility Principle (SRP) at the component level, it signifies a deliberate design decision: Express delegates specialized protocol specifications (like mime-types, cookie signing, or content disposition) to the open-source community, keeping the core codebase highly cohesive and focused purely on routing and delegation HTTP contracts.
 
 ### 4.3 Performance and Low Overhead
 
 As a foundational web framework, minimizing runtime performance overhead and memory latency is critical for high-throughput network applications.
 
-- **Supporting Architecture:** The internal architecture avoids heavy abstractions, deep inheritance layers, or complex runtime dependency injection containers. Objects are structured as thin wrappers that directly extend Node.js native streams (`http.IncomingMessage` and `http.ServerResponse`).
-- **Metrics-Based Evidence:** This is reflected in the Fan-in metrics of the request and response modules. They act as fundamental abstractions heavily utilized by the orchestrators (`lib/express.js` and `lib/application.js`). By relying on efficient runtime prototype mutation (`merge-descriptors` and prototype reassignment inside `lib/middleware/init.js`) rather than creating deep encapsulation layers or factory proxies, the architecture ensures that wrapping a raw HTTP network stream into an Express context happens with near-zero memory and execution overhead.
+- **Supporting Architecture:** The internal architecture avoids heavy abstractions, deep inheritance layers, or complex runtime dependency injection containers. Objects are structured as thin Runtime Adapters that directly mutate and enrich Node.js native streams (`http.IncomingMessage` and `http.ServerResponse`).
+- **Metrics-Based Evidence:** This is reflected in the Fan-in metrics of the request and response modules. They act as fundamental abstractions heavily utilized by the orchestrators (`lib/express.js` and `lib/application.js`). By relying on efficient runtime prototype mutation (`merge-descriptors` and prototype reassignment inside `lib/middleware/init.js`) rather than creating deep encapsulation layers or factory proxies, the architecture ensures that wrapping a raw HTTP network stream into an Express context happens with near-zero memory allocation and minimal execution overhead.
 
 ### 4.4 Architectural Characteristics Summary
 
 | Quality Attribute | Architectural Mechanism | Supporting Coupling/Cohesion Metric |
 | :--- | :--- | :--- |
-| Extensibility | Middleware Pipeline (Chain of Responsibility) | High Functional Cohesion; internal Fan-out of 0 for leaf modules (`view.js`). |
-| Maintainability | Facade Isolation (`lib/express.js`) | Low Change Propagation; entry point is isolated from core internal refactoring. |
-| Modularity | Micro-package delegation model | High external Fan-out (16 in `response.js`) balancing low core complexity. |
-| Performance | Direct Node.js prototype extension | Low abstraction depth; high structural Fan-in for core HTTP wrappers. |
+| **Extensibility** | Middleware Pipeline (Chain of Responsibility) | High Functional Cohesion; internal Fan-out of 0 for leaf modules (`view.js`). |
+| **Maintainability**| Facade Isolation (`lib/express.js`) | Low Change Propagation; entry point is isolated from core internal refactoring. |
+| **Modularity** | Micro-package delegation model | High external Fan-out (16 in `response.js`) balancing low core complexity and structural SRP trade-offs. |
+| **Performance** | Runtime Prototype Adaptation | Low abstraction depth; high structural Fan-in for core HTTP wrappers. |

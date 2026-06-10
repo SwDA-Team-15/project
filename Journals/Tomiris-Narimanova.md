@@ -27,3 +27,12 @@
 
 - **Report Software Design:** Finalized **Section 1.3 (Findings)** and **Section 1.4 (Knowledge Dependencies)**, fixing inconsistencies between our graphs.
 - **Report Software Architecture:** Wrote **Section 4 (Architectural Characteristics)**, using our coupling metrics to support the quality attributes analysis.
+
+---
+
+## Weeks 4-5 (June 1 - June 10, 2026)
+
+### Contributions to the Report
+
+- **Report Software Architecture:** Refactored **Section 4 (Architectural Characteristics)** to tightly integrate our metrics with the component-level SRP and OCP design trade-offs.
+- **Report Software Architecture:** Assisted in restructuring **Section 3 (C4 Diagrams & SOLID Analysis)** to maintain strict academic language and precise dependency directions.

@@ -1,4 +1,4 @@
-## 1. Context diagram - C4 Level 1 (draft)
+## 1. Context diagram - C4 Level 1 
 
 ### Diagram
 

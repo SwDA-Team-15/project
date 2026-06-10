@@ -1,6 +1,6 @@
 # Journal - Sadaf Qureshi, s338701
 
-## Weeks 1-2 (May 11 - May 24, 2026)
+## Weeks 1-2 
 
 ### Tasks & Progress
 
@@ -15,7 +15,7 @@
 - **Report Software Design:** Created and filled the data table in **Section 1.2 (Code Dependency Results)** with the Fan-in/Fan-out metrics.
 
 ---
-## Week 3 (May 25 – May 31, 2026)
+## Week 3 
 
 ### Tasks & Progress
 
@@ -26,7 +26,7 @@
 - **Report Software Architecture:** Built the C4 Context Diagram , showing how Express.js sits within its environment and what it communicates with.
 
 ---
-## Weeks 4–5 (June 1 – June 10, 2026)
+## Weeks 4–5 
 
 ### Tasks & Progress
 - Report Software Architecture: Polished the Context Diagram based on feedback — tightened up the dependency arrows and made the system boundary clearer.

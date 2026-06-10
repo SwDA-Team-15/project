@@ -1,8 +1,8 @@
 ## 1. Context diagram - C4 Level 1 
 
-### Diagram
-
 The Express.js Context Diagram, modeled at C4 Level 1, provides a high-level architectural view of the Express.js web framework and its relationships with the surrounding actors and external systems. The diagram identifies two primary human actors the Application Developer and the HTTP Client / End User , alongside five external systems that Express.js depends on or integrates with. Together, these elements illustrate how Express.js sits at the center of a Node.js web application ecosystem, orchestrating HTTP communication, middleware processing, routing, and view rendering.
+
+### Diagram
 
 ![Express.js System Context Diagram](./img/context-diagram.png)
 

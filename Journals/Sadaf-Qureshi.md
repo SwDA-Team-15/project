@@ -25,7 +25,7 @@
 ## Weeks 4–5 
 
 ### Tasks & Progress
-- Report Software Architecture: Polished the Context Diagram based on feedback — tightened up the dependency arrows and made the system boundary clearer.
+- **Report Software Architecture:** Polished the Context Diagram based on feedback — tightened up the dependency arrows and made the system boundary clearer.
 - Protocol & Interaction Mapping: Explicitly labeled the specific communication protocols (e.g., HTTP/HTTPS requests, internal JavaScript function execution, middleware interception paths) along the connection vectors in the C4 model.
 - Cross-Section Alignment: Conducted a thorough review of the architectural narrative text to guarantee complete consistency between the written technical explanations and the visual boundaries defined within the diagram.
 - Team Integration: Synchronized our high-level Context definitions with the team's subsequent Container and Component level breakdowns to ensure a seamless, logical hierarchy across the entire architecture report.

@@ -47,42 +47,44 @@ The diagram below was produced with **Structurizr**, rendered natively in GitHub
 
 ### Explanation of each container
 
-**HTTP Client**  
-Anything that sends an HTTP request to the server — a browser, a mobile app, a curl command, another service.
+**Application Developer** *(person)*  
+The developer who builds the web application using Express. They use the framework's public API to register routes, add middleware, and configure the app.
 
-**Node.js HTTP Server** *(external)*  
-The built-in `http` module creates a TCP socket, accepts connections, and calls the Express app function with the raw `IncomingMessage` (req) and `ServerResponse` (res) objects.
+**HTTP Client / End User** *(person)*  
+Anyone who sends an HTTP request to the running app — a browser, a mobile app, or another service calling an API.
 
-**Express Core** (`lib/express.js`, `lib/application.js`)  
-This is the entry point of the framework. It creates the app object via the factory function, stores application-level settings (`app.set()`), registers template engines (`app.engine()`), and owns the top-level `app.use()` and routing methods. On each incoming request it triggers the request/response enrichment and hands off to the Router.
+**Express Core** *(internal — `lib/express.js`, `lib/application.js`)*  
+This is the starting point of the whole framework. When you call `express()`, this is what runs. It creates the application instance via `createApplication()`, keeps track of all the settings via `app.set()`, registers template engines via `app.engine()`, and exposes the API the developer uses to build their app. Every incoming request passes through here first before anything else happens.
 
-**Router & Middleware Engine** (`lib/router/`)  
-This is the heart of the request pipeline. It holds an ordered stack of `Layer` objects — each one wrapping a middleware function or a route handler. When a request comes in, it walks the stack, matches the request path and method, and calls each matching handler in order. Calling `next()` advances to the next layer; not calling it stops the chain. Error-handling middleware (four-argument functions) is a special layer type reserved for propagating errors down the chain.
+**Router & Middleware Engine** *(internal — `lib/router/index.js`, `lib/router/layer.js`, `lib/router/route.js`)*  
+This is where the actual request handling lives. It keeps an ordered list of middleware functions and route handlers registered via `app.use()` and `app.get/post/put/delete()`. When a request comes in, `router.handle()` goes through each one in order until something sends a response back. If a piece of middleware is done with its job, it just calls `next()` to move to the next one in line.
 
-**Request / Response Enrichment** (`lib/request.js`, `lib/response.js`, `lib/middleware/init.js`)  
-Node's raw `req` and `res` objects are intentionally minimal. This container is responsible for extending them at the start of every request by swapping their prototype chain. After enrichment, `req` gains helpers like `req.params`, `req.query`, `req.accepts()`, and `req.is()`; `res` gains `res.json()`, `res.send()`, `res.redirect()`, `res.cookie()`, and `res.render()`. This happens once per request with no extra object allocation.
+**Request / Response Enrichment** *(internal — `lib/request.js`, `lib/response.js`, `lib/middleware/init.js`)*  
+Node.js gives Express a very basic request and response object. This container upgrades both of them at the start of every request using `Object.setPrototypeOf()`. After that, `req` gets helpers like `req.params`, `req.query`, and `req.accepts()`, and `res` gets things like `res.json()`, `res.send()`, `res.redirect()`, and `res.render()`.
 
-**View / Template Engine** (`lib/view.js` + `app.engine()`)  
-This container handles `res.render()` calls. It resolves the template file path, picks the registered engine for that file's extension, and delegates the actual rendering to it. The engine itself is external — Express only calls it via the agreed interface `fn(path, options, callback)`. One app can have multiple engines registered for different file extensions at the same time.
+**View Engine** *(internal — `lib/view.js`)*  
+When a route handler calls `res.render()`, the request ends up here. `View.prototype.render()` figures out which template file to use and which rendering library to hand it off to, based on the file extension registered via `app.engine()`. It does not do any rendering itself — it just coordinates the handoff to the external template engine.
 
-**Static File Middleware** (`serve-static` package)  
-An optional middleware layer mounted with `app.use(express.static('public'))`. When a request path matches a file on the filesystem it reads and streams it directly, bypassing all route handlers. If no file matches, it calls `next()` and the request continues down the middleware stack.
+**Static File Middleware** *(internal — `lib/middleware/init.js`, wraps `serve-static`)*  
+This container handles requests for static assets like images, CSS, and JavaScript files. It is mounted via `app.use(express.static('public'))`. If the requested file exists on the filesystem, it gets sent back directly without going through any route handler. If not, it calls `next()` and the request continues down the stack.
 
-**Template Library** *(external)*  
-A third-party npm package such as `pug`, `ejs`, or `handlebars`. Express knows nothing about its internals — it just calls the registered function and waits for the callback.
+**Body Parser Middleware** *(internal — wraps `body-parser`, exposed via `lib/express.js`)*  
+When a request comes in with a body — like a JSON payload or form data — this container reads and parses it so route handlers can access it via `req.body`. It is exposed by Express as `express.json()` and `express.urlencoded()`. Without this, the developer would have to read and parse the raw data stream themselves.
 
-**File System** *(external)*  
-The operating system's file system, used both by the static middleware (to serve assets) and by the view engine (to read template files).
+**Node.js Built-in APIs** *(external)*  
+The core of Node.js itself. Express relies on `http.createServer()` inside `app.listen()` to actually create the server and accept connections, and also uses `fs`, `path`, and `events` for file operations and event handling.
 
----
+**Template Engines** *(external)*  
+Third-party libraries like EJS, Pug, or Handlebars that do the actual work of turning a template file and some data into an HTML page. Express supports any of them as long as they follow the `fn(path, options, callback)` interface registered via `app.engine()`.
 
-### Relationship with Clean Architecture
+**router package** *(external)*  
+An external npm package that Express 5 uses under the hood to manage route matching and the middleware stack. The Router & Middleware Engine container is built on top of it, using its `Route` and `Layer` objects.
 
-Clean Architecture organises code into concentric layers — from the outermost (frameworks and drivers) inward to use cases and entities — with the rule that dependencies only point inward and inner layers know nothing about outer ones.
+**serve-static** *(external)*  
+The npm package that the Static File Middleware container wraps. It contains all the actual logic for finding and streaming files from the filesystem in response to a request.
 
-Express does not enforce Clean Architecture, but it is strongly compatible with it, and the container diagram makes this visible. In our containers, the Node.js HTTP Server and Express Core correspond to the outer framework/driver layer, the Router & Middleware Engine plays the role of interface adapter, and the User Application container matches the use-case layer, while views and static middleware sit at the I/O boundary.
-
-The main difference is that Express does not enforce this structure. There is nothing stopping a developer from putting database calls directly inside a route handler, which would mix use-case logic with interface adapter concerns and break the Clean Architecture principle.
+**body-parser** *(external)*  
+The npm package that the Body Parser Middleware container wraps. It handles the low-level parsing of request body formats including JSON, URL-encoded, raw, and plain text.
 
 ---
 

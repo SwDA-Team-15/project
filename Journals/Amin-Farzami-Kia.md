@@ -1,6 +1,6 @@
 # Journal - Amin Farzami Kia, s338999
 
-## Weeks 1-2 (May 11 - May 24, 2026)
+## Weeks 1-2
 
 ### Activities & Effort
 
@@ -15,7 +15,7 @@
 
 ---
 
-## Week 3 (May 25 - May 31, 2026)
+## Week 3
 
 ### Activities & Effort
 
@@ -25,7 +25,6 @@
 
 ### Contributions to the Report
 
-- **Report Software Architecture:** Wrote the **Context Level (C4 Level 1)** section, including the diagram description, the actors, and the external systems table.
 - **Report Software Architecture:** Started drafting the **Container Level (C4 Level 2)** section, producing the initial container diagram and explanations.
 
 ---
@@ -36,10 +35,9 @@
 
 - Refined the container diagram multiple times to make sure it was fully aligned with the context diagram — adding the missing body-parser and router package containers, fixing external system names, and cleaning up container descriptions.
 - Switched the container diagram tooling to **Structurizr DSL** and wrote the full workspace code including styles, relationships with protocols, and layout.
-- Reviewed the Clean Architecture section to make sure the connection between the container structure and the Clean Architecture blueprint was clearly explained.
 
 ### Contributions to the Report
 
-- **Report Software Architecture:** Finalized **Section 2 (Container Level)**, including the Structurizr DSL diagram, the per-container explanations, and the Clean Architecture relationship paragraph.
+- **Report Software Architecture:** Finalized **Section 2 (Container Level)**, including the Structurizr DSL diagram, and the Clean Architecture relationship paragraph.
 - **Report Software Architecture:** Ensured all container descriptions focused on what each container does rather than listing internal methods or file names.
 - **Report Software Architecture:** Added protocol labels to all relationships in the container diagram (e.g. HTTP/HTTPS, Internal function call, npm require, Callback fn(path, options, cb)).
